@@ -6,9 +6,11 @@
 document.addEventListener("DOMContentLoaded", () => {
   // State
   const state = {
-    selectedLanguage: "python",
-    selectedTopic: "",
+    selectedLanguage: "any",
+    customLanguage: "",
+    selectedDomain: "",
     selectedLevel: "first-timer",
+    selectedEffort: "any",
     issues: [],
     loading: false,
     activeIssue: null,
@@ -17,9 +19,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // DOM Elements
   const modelStatusText = document.getElementById("modelStatusText");
-  const languagePills = document.querySelectorAll("#languagePills .pill");
+  const languagePills = document.querySelectorAll("#languagePills .pill[data-lang], #languageOverflow .pill[data-lang]");
+  const languageOverflow = document.getElementById("languageOverflow");
+  const btnToggleLanguages = document.getElementById("btnToggleLanguages");
+  const btnCustomLanguage = document.getElementById("btnCustomLanguage");
+  const languageCustomEntry = document.getElementById("languageCustomEntry");
+  const customLanguageInput = document.getElementById("customLanguageInput");
+  const btnHideCustomLanguage = document.getElementById("btnHideCustomLanguage");
   const domainPills = document.querySelectorAll("#domainPills .pill");
   const experienceToggleBtns = document.querySelectorAll("#experienceToggle .toggle-btn");
+  const effortPills = document.querySelectorAll("#effortPills .pill");
   const btnDiscoverIssues = document.getElementById("btnDiscoverIssues");
   const btnLoadDemo = document.getElementById("btnLoadDemo");
   const issuesGrid = document.getElementById("issuesGrid");
@@ -72,11 +81,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Update Active Filter Tags
   function updateFilterTags() {
+    const languageLabel = state.customLanguage || (state.selectedLanguage === "any" ? "ANY" : state.selectedLanguage.toUpperCase());
+    const effortLabel = state.selectedEffort === "any" ? "ANY HORIZON" : state.selectedEffort.toUpperCase();
     activeFilterTags.innerHTML = `
-      <span class="filter-tag">Lang: ${state.selectedLanguage.toUpperCase()}</span>
-      ${state.selectedTopic ? `<span class="filter-tag">Topic: ${state.selectedTopic}</span>` : ""}
+      <span class="filter-tag">Lang: ${escapeHtml(languageLabel)}</span>
+      ${state.selectedDomain ? `<span class="filter-tag">Domain: ${escapeHtml(state.selectedDomain)}</span>` : ""}
       <span class="filter-tag">Level: ${state.selectedLevel}</span>
+      <span class="filter-tag">Effort: ${effortLabel}</span>
     `;
+  }
+
+  function selectedLanguageValue() {
+    return state.customLanguage.trim() || (state.selectedLanguage === "any" ? "" : state.selectedLanguage);
   }
 
   // Render Skeletons in Grid
@@ -106,8 +122,10 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          language: state.selectedLanguage,
-          topic: state.selectedTopic || null,
+          language: selectedLanguageValue(),
+          topic: state.selectedDomain || null,
+          experience: state.selectedLevel,
+          effort: state.selectedEffort === "any" ? null : state.selectedEffort,
           limit: 6,
         }),
       });
@@ -223,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.style.overflow = "hidden";
 
     drawerTitle.textContent = `#${issue.number} ${issue.title}`;
-    drawerMeta.textContent = `${issue.repo} • Primary: ${state.selectedLanguage.toUpperCase()}`;
+    drawerMeta.textContent = `${issue.repo} • Primary: ${(state.customLanguage || state.selectedLanguage).toUpperCase()}`;
     drawerEngineLabel.textContent = "Synthesizing Dossier...";
 
     dossierSkeleton.style.display = "block";
@@ -239,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
           title: issue.title,
           html_url: issue.html_url,
           body: issue.body,
-          language: state.selectedLanguage,
+          language: selectedLanguageValue(),
         }),
       });
 
@@ -393,16 +411,50 @@ ${quickstart.lint || "ruff check ."}`;
       languagePills.forEach((p) => p.classList.remove("active"));
       pill.classList.add("active");
       state.selectedLanguage = pill.getAttribute("data-lang");
+      state.customLanguage = "";
+      customLanguageInput.value = "";
       updateFilterTags();
       fetchCandidateIssues();
     });
+  });
+
+  btnToggleLanguages.addEventListener("click", () => {
+    const expanded = !languageOverflow.hidden;
+    languageOverflow.hidden = expanded;
+    btnToggleLanguages.textContent = expanded ? "Show more languages..." : "Show fewer languages";
+  });
+
+  btnCustomLanguage.addEventListener("click", () => {
+    languageCustomEntry.hidden = false;
+    customLanguageInput.focus();
+  });
+
+  customLanguageInput.addEventListener("input", () => {
+    state.customLanguage = customLanguageInput.value;
+    languagePills.forEach((p) => p.classList.remove("active"));
+    updateFilterTags();
+  });
+
+  customLanguageInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      fetchCandidateIssues();
+    }
+  });
+
+  btnHideCustomLanguage.addEventListener("click", () => {
+    state.customLanguage = "";
+    customLanguageInput.value = "";
+    languageCustomEntry.hidden = true;
+    languagePills.forEach((p) => p.classList.toggle("active", p.getAttribute("data-lang") === state.selectedLanguage));
+    updateFilterTags();
   });
 
   domainPills.forEach((pill) => {
     pill.addEventListener("click", () => {
       domainPills.forEach((p) => p.classList.remove("active"));
       pill.classList.add("active");
-      state.selectedTopic = pill.getAttribute("data-topic");
+      state.selectedDomain = pill.getAttribute("data-topic");
       updateFilterTags();
       fetchCandidateIssues();
     });
@@ -414,6 +466,17 @@ ${quickstart.lint || "ruff check ."}`;
       btn.classList.add("active");
       state.selectedLevel = btn.getAttribute("data-level");
       updateFilterTags();
+      fetchCandidateIssues();
+    });
+  });
+
+  effortPills.forEach((pill) => {
+    pill.addEventListener("click", () => {
+      effortPills.forEach((p) => p.classList.remove("active"));
+      pill.classList.add("active");
+      state.selectedEffort = pill.getAttribute("data-effort");
+      updateFilterTags();
+      fetchCandidateIssues();
     });
   });
 
@@ -428,18 +491,26 @@ ${quickstart.lint || "ruff check ."}`;
       p.classList.toggle("active", p.getAttribute("data-lang") === "python");
     });
     state.selectedLanguage = "python";
+    state.customLanguage = "";
+    customLanguageInput.value = "";
+    languageCustomEntry.hidden = true;
 
     // Select CLI
     domainPills.forEach((p) => {
       p.classList.toggle("active", p.getAttribute("data-topic") === "cli");
     });
-    state.selectedTopic = "cli";
+    state.selectedDomain = "cli";
 
     // Select First Timer
     experienceToggleBtns.forEach((b) => {
       b.classList.toggle("active", b.getAttribute("data-level") === "first-timer");
     });
     state.selectedLevel = "first-timer";
+
+    effortPills.forEach((p) => {
+      p.classList.toggle("active", p.getAttribute("data-effort") === "any");
+    });
+    state.selectedEffort = "any";
 
     updateFilterTags();
     showToast("Loaded demo profile: Python + CLI Tools");
@@ -459,7 +530,7 @@ ${quickstart.lint || "ruff check ."}`;
   // Utilities
   function escapeHtml(str) {
     if (!str) return "";
-    return str
+    return String(str)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")

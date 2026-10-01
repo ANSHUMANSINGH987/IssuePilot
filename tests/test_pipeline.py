@@ -12,6 +12,7 @@ Validates:
 
 import os
 import sys
+import urllib.error
 from pathlib import Path
 import pytest
 
@@ -25,6 +26,7 @@ for p in [str(PROJECT_ROOT), str(SCRIPTS_DIR), str(HARNESS_DIR), str(WEB_DIR)]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
+import scan_issues
 from scan_issues import find_candidate_issues, build_search_query
 from analyze_repo import analyze_github_repo, infer_stack, infer_quickstart
 from harness.client import OpenWeightClient
@@ -56,6 +58,35 @@ def test_issue_scanner_fallback():
     for k in required_keys:
         assert k in sample, f"Missing key '{k}' in discovered candidate issue"
     assert isinstance(sample["labels"], list)
+    assert sample["url"] == sample["html_url"]
+
+
+def test_expanded_query_aliases():
+    """Validates friendly language and domain values become GitHub qualifiers."""
+    csharp_query = build_search_query(language="c#", topic="cybersecurity")
+    docs_query = build_search_query(language="any", topic="docs")
+    ai_query = build_search_query(language="cpp", topic="ai")
+
+    assert 'language:"C#"' in csharp_query
+    assert "topic:security" in csharp_query and "topic:infosec" in csharp_query
+    assert "language:" not in docs_query
+    assert 'label:"documentation"' in docs_query and 'label:"docs"' in docs_query
+    assert 'language:"C++"' in ai_query
+    assert "topic:machine-learning" in ai_query
+
+
+def test_expanded_fixture_filters(monkeypatch):
+    """Validates offline fixtures cover domain and effort filters."""
+    def raise_offline(*args, **kwargs):
+        raise urllib.error.URLError("offline")
+
+    monkeypatch.setattr(scan_issues.urllib.request, "urlopen", raise_offline)
+    docs = find_candidate_issues(language="any", topic="docs", limit=20)
+    mobile = find_candidate_issues(language="kotlin", topic="mobile", effort="quick", limit=20)
+
+    assert docs and all(issue["domain"] == "docs" for issue in docs)
+    assert mobile and mobile[0]["language"] == "kotlin"
+    assert mobile[0]["effort"] == "quick"
 
 
 # ==============================================================================
@@ -150,6 +181,39 @@ def test_api_scan():
     assert data["success"] is True
     assert isinstance(data["issues"], list)
     assert len(data["issues"]) > 0
+
+
+def test_api_scan_expanded_filters(monkeypatch):
+    """Validates the web API forwards the expanded selector state."""
+    captured = {}
+
+    def fake_scan(**kwargs):
+        captured.update(kwargs)
+        return []
+
+    import web.server as web_server
+    monkeypatch.setattr(web_server, "find_candidate_issues", fake_scan)
+    response = client.post(
+        "/api/scan",
+        json={
+            "language": "Kotlin",
+            "topic": "mobile",
+            "experience": "moderate",
+            "effort": "quick",
+            "limit": 4,
+        },
+    )
+
+    assert response.status_code == 200
+    assert captured == {
+        "language": "Kotlin",
+        "topic": "mobile",
+        "effort": "quick",
+        "limit": 4,
+        "repo": None,
+        "use_mock_fallback": True,
+    }
+    assert response.json()["filters"]["experience"] == "moderate"
 
 
 def test_api_dossier():

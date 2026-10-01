@@ -55,11 +55,14 @@ MOCK_CANDIDATE_ISSUES = [
         "title": "Add retry mechanism with exponential backoff to HTTP client",
         "repo": "psf/requests-toolbelt",
         "html_url": "https://github.com/psf/requests-toolbelt/issues/42",
+        "url": "https://github.com/psf/requests-toolbelt/issues/42",
         "author": "sigmaview",
         "labels": ["good first issue", "hacktoberfest", "help wanted"],
         "comments": 2,
         "created_at": "2026-09-28T10:14:00Z",
         "language": "python",
+        "domain": "systems",
+        "effort": "standard",
         "body": "The current HTTP adapter fails immediately on 503 Service Unavailable without retrying. We should implement an optional MaxRetry wrapper that respects the Retry-After header with exponential backoff.",
     },
     {
@@ -68,11 +71,14 @@ MOCK_CANDIDATE_ISSUES = [
         "title": "Improve CLI error message when configuration file is malformed",
         "repo": "fastapi/fastapi-cli",
         "html_url": "https://github.com/fastapi/fastapi-cli/issues/88",
+        "url": "https://github.com/fastapi/fastapi-cli/issues/88",
         "author": "dev-guru",
         "labels": ["good first issue", "help wanted"],
         "comments": 1,
         "created_at": "2026-09-30T14:20:00Z",
         "language": "python",
+        "domain": "cli",
+        "effort": "quick",
         "body": "When fastapi.json has a syntax error, the CLI currently dumps a raw JSONDecodeError traceback. We should catch this exception and display a clean, friendly error message pointing to the line number.",
     },
     {
@@ -81,14 +87,121 @@ MOCK_CANDIDATE_ISSUES = [
         "title": "Add dark mode toggle support in navigation component",
         "repo": "shadcn/ui-components",
         "html_url": "https://github.com/shadcn/ui-components/issues/154",
+        "url": "https://github.com/shadcn/ui-components/issues/154",
         "author": "frontend-pro",
         "labels": ["good first issue", "hacktoberfest"],
         "comments": 3,
         "created_at": "2026-09-29T18:45:00Z",
         "language": "typescript",
+        "domain": "frontend",
+        "effort": "standard",
         "body": "The top navbar does not sync with the user's system dark mode preference or provide a manual toggle icon button. Needs a responsive theme switcher component.",
     }
 ]
+
+MOCK_CANDIDATE_ISSUES.extend([
+    {
+        "id": 104,
+        "number": 61,
+        "title": "Add a retrieval example for the agent toolkit",
+        "repo": "openai/openai-cookbook",
+        "html_url": "https://github.com/openai/openai-cookbook/issues/61",
+        "url": "https://github.com/openai/openai-cookbook/issues/61",
+        "author": "mlh-mentor",
+        "labels": ["good first issue", "documentation", "ai"],
+        "comments": 2,
+        "created_at": "2026-09-27T11:00:00Z",
+        "language": "python",
+        "domain": "ai",
+        "effort": "deep-dive",
+        "body": "Document a small retrieval-augmented generation example for students building AI agents.",
+    },
+    {
+        "id": 105,
+        "number": 73,
+        "title": "Improve local container development instructions",
+        "repo": "docker/awesome-compose",
+        "html_url": "https://github.com/docker/awesome-compose/issues/73",
+        "url": "https://github.com/docker/awesome-compose/issues/73",
+        "author": "cloud-guide",
+        "labels": ["good first issue", "help wanted", "devops"],
+        "comments": 1,
+        "created_at": "2026-09-26T09:30:00Z",
+        "language": "yaml",
+        "domain": "cloud",
+        "effort": "standard",
+        "body": "Clarify the Docker Compose steps and health checks for local cloud-native development.",
+    },
+    {
+        "id": 106,
+        "number": 29,
+        "title": "Add onboarding notes for the Kotlin mobile sample",
+        "repo": "android/nowinandroid",
+        "html_url": "https://github.com/android/nowinandroid/issues/29",
+        "url": "https://github.com/android/nowinandroid/issues/29",
+        "author": "mobile-student",
+        "labels": ["good first issue", "help wanted", "android"],
+        "comments": 2,
+        "created_at": "2026-09-25T16:20:00Z",
+        "language": "kotlin",
+        "domain": "mobile",
+        "effort": "quick",
+        "body": "Add a concise setup note for running the Kotlin mobile sample on an emulator.",
+    },
+    {
+        "id": 107,
+        "number": 18,
+        "title": "Document the secure password reset flow",
+        "repo": "owasp/www-project-top-ten",
+        "html_url": "https://github.com/owasp/www-project-top-ten/issues/18",
+        "url": "https://github.com/owasp/www-project-top-ten/issues/18",
+        "author": "security-writer",
+        "labels": ["good first issue", "documentation", "cybersecurity"],
+        "comments": 1,
+        "created_at": "2026-09-24T12:10:00Z",
+        "language": "markdown",
+        "domain": "docs",
+        "effort": "standard",
+        "body": "Improve the technical writing around secure password reset implementation and threat modeling.",
+    },
+    {
+        "id": 108,
+        "number": 34,
+        "title": "Add a Zig systems programming example",
+        "repo": "zigtools/zls",
+        "html_url": "https://github.com/zigtools/zls/issues/34",
+        "url": "https://github.com/zigtools/zls/issues/34",
+        "author": "systems-student",
+        "labels": ["good first issue", "help wanted", "systems"],
+        "comments": 3,
+        "created_at": "2026-09-23T08:45:00Z",
+        "language": "zig",
+        "domain": "systems",
+        "effort": "deep-dive",
+        "body": "Add a focused Zig example showing how to inspect symbols in a systems project.",
+    },
+])
+
+LANGUAGE_QUERY_ALIASES = {
+    "c#": '"C#"',
+    "csharp": '"C#"',
+    "cpp": '"C++"',
+    "c++": '"C++"',
+}
+
+DOMAIN_QUERY_ALIASES = {
+    "ai": "(topic:ai OR topic:machine-learning OR topic:llm OR topic:agents)",
+    "agents": "(topic:ai OR topic:machine-learning OR topic:llm OR topic:agents)",
+    "cybersecurity": "(topic:security OR topic:infosec)",
+    "security": "(topic:security OR topic:infosec)",
+    "docs": '(label:"documentation" OR label:"docs")',
+    "documentation": '(label:"documentation" OR label:"docs")',
+    "web": "(topic:web OR topic:api)",
+    "frontend": "(topic:frontend OR topic:ui)",
+    "cloud": "(topic:cloud OR topic:devops)",
+    "devops": "(topic:cloud OR topic:devops)",
+    "mobile": "(topic:mobile OR topic:android OR topic:ios)",
+}
 
 
 def build_search_query(
@@ -97,6 +210,7 @@ def build_search_query(
     labels: Optional[List[str]] = None,
     max_comments: int = 5,
     repo: Optional[str] = None,
+    effort: Optional[str] = None,
 ) -> str:
     """Constructs a targeted GitHub issue search query."""
     parts = ["is:issue", "is:open", "no:assignee"]
@@ -107,11 +221,14 @@ def build_search_query(
     if repo:
         parts.append(f"repo:{repo}")
 
-    if language:
-        parts.append(f"language:{language}")
+    normalized_language = (language or "").strip().lower()
+    if normalized_language and normalized_language not in {"any", "*"}:
+        language_query = LANGUAGE_QUERY_ALIASES.get(normalized_language, language.strip())
+        parts.append(f"language:{language_query}")
 
-    if topic:
-        parts.append(topic)
+    normalized_topic = (topic or "").strip().lower()
+    if normalized_topic and normalized_topic not in {"any", "all", "all domains", "*"}:
+        parts.append(DOMAIN_QUERY_ALIASES.get(normalized_topic, topic.strip()))
 
     # Label qualification
     if labels:
@@ -131,6 +248,7 @@ def find_candidate_issues(
     repo: Optional[str] = None,
     token: Optional[str] = None,
     use_mock_fallback: bool = True,
+    effort: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
     Queries GitHub Search API for candidate beginner issues.
@@ -141,7 +259,8 @@ def find_candidate_issues(
         language=language,
         topic=topic,
         max_comments=max_comments,
-        repo=repo
+        repo=repo,
+        effort=effort,
     )
 
     url = f"https://api.github.com/search/issues?q={urllib.parse.quote(query)}&sort=created&order=desc&per_page={limit}"
@@ -179,11 +298,14 @@ def find_candidate_issues(
                     "repo": repo_full_name,
                     "html_url": item.get("html_url"),
                     "url": item.get("html_url"),
+                    "url": item.get("html_url"),
                     "author": (item.get("user") or {}).get("login", "unknown"),
                     "labels": [lbl.get("name") for lbl in item.get("labels", []) if isinstance(lbl, dict)],
                     "comments": item.get("comments", 0),
                     "created_at": item.get("created_at"),
                     "language": language or "any",
+                    "domain": topic or "any",
+                    "effort": effort or "any",
                     "body": summary_body,
                 })
             
@@ -199,28 +321,36 @@ def find_candidate_issues(
 
     if use_mock_fallback:
         sys.stderr.write("[INFO] Using verified candidate issue fixtures for local development.\n")
-        # Filter mock candidates by language if specified
-        if language:
-            filtered = [c for c in MOCK_CANDIDATE_ISSUES if c.get("language") == language.lower()]
-            if filtered:
-                candidates = filtered
-            else:
-                candidates = MOCK_CANDIDATE_ISSUES
-        else:
-            candidates = MOCK_CANDIDATE_ISSUES
+        # Filter mock candidates by language if specified.
+        normalized_language = (language or "").strip().lower()
+        candidates = MOCK_CANDIDATE_ISSUES
+        if normalized_language and normalized_language not in {"any", "*"}:
+            candidates = [
+                candidate for candidate in candidates
+                if candidate.get("language", "").lower() == normalized_language
+            ]
 
-        if topic:
-            topic_text = topic.lower()
+        normalized_topic = (topic or "").strip().lower()
+        if normalized_topic and normalized_topic not in {"any", "all", "all domains", "*"}:
+            topic_text = normalized_topic
             candidates = [
                 candidate for candidate in candidates
                 if topic_text in " ".join([
+                    candidate.get("domain", "").lower(),
                     *(label.lower() for label in candidate.get("labels", [])),
                     candidate.get("title", "").lower(),
                     candidate.get("body", "").lower(),
                 ])
             ]
 
-        return candidates[:limit]
+        normalized_effort = (effort or "").strip().lower()
+        if normalized_effort and normalized_effort not in {"any", "*"}:
+            candidates = [
+                candidate for candidate in candidates
+                if candidate.get("effort", "").lower() == normalized_effort
+            ]
+
+        return [dict(candidate, url=candidate.get("html_url")) for candidate in candidates[:limit]]
 
     return []
 

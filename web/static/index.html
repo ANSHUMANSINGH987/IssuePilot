@@ -58,26 +58,56 @@
 
       <!-- Interactive Profiling Bar -->
       <div class="profiler-card">
-        <div class="profiler-row">
-          <div class="filter-group">
-            <span class="filter-label">Primary Language</span>
+        <div class="profiler-row selector-row">
+          <div class="filter-group filter-group-wide">
+            <div class="filter-heading">
+              <span class="filter-label">Languages</span>
+              <span class="filter-note">Choose a familiar stack or search any GitHub language</span>
+            </div>
             <div class="pill-group" id="languagePills">
-              <button class="pill active" data-lang="python">Python</button>
+              <button class="pill active" data-lang="any">Any</button>
+              <button class="pill" data-lang="python">Python</button>
               <button class="pill" data-lang="typescript">TypeScript</button>
+              <button class="pill" data-lang="javascript">JavaScript</button>
+              <button class="pill" data-lang="java">Java</button>
+              <button class="pill" data-lang="cpp">C++</button>
               <button class="pill" data-lang="go">Go</button>
               <button class="pill" data-lang="rust">Rust</button>
-              <button class="pill" data-lang="cpp">C++</button>
+              <button class="pill" data-lang="c#">C#</button>
+              <button class="pill custom-language-pill" id="btnCustomLanguage" type="button">+ Custom Language</button>
             </div>
+            <div class="language-overflow" id="languageOverflow" hidden>
+              <button class="pill" data-lang="kotlin">Kotlin</button>
+              <button class="pill" data-lang="swift">Swift</button>
+              <button class="pill" data-lang="dart">Dart</button>
+              <button class="pill" data-lang="php">PHP</button>
+              <button class="pill" data-lang="ruby">Ruby</button>
+              <button class="pill" data-lang="zig">Zig</button>
+              <button class="pill" data-lang="elixir">Elixir</button>
+              <button class="pill" data-lang="solidity">Solidity</button>
+            </div>
+            <div class="language-custom-entry" id="languageCustomEntry" hidden>
+              <input id="customLanguageInput" class="custom-language-input" type="text" maxlength="40" placeholder="Type a GitHub language and press Enter" aria-label="Custom GitHub language">
+              <button class="text-button" id="btnHideCustomLanguage" type="button">Cancel</button>
+            </div>
+            <button class="text-button language-more-button" id="btnToggleLanguages" type="button">Show more languages...</button>
           </div>
 
-          <div class="filter-group">
-            <span class="filter-label">Domain Scope</span>
+          <div class="filter-group filter-group-wide">
+            <div class="filter-heading">
+              <span class="filter-label">Domain Scope</span>
+              <span class="filter-note">Match the kind of contribution you want to make</span>
+            </div>
             <div class="pill-group" id="domainPills">
               <button class="pill active" data-topic="">All Domains</button>
-              <button class="pill" data-topic="cli">CLI Tooling</button>
+              <button class="pill" data-topic="ai">AI / ML & Agents</button>
               <button class="pill" data-topic="web">Web & API</button>
-              <button class="pill" data-topic="ai">AI / ML</button>
-              <button class="pill" data-topic="docs">Documentation</button>
+              <button class="pill" data-topic="frontend">Frontend & UI</button>
+              <button class="pill" data-topic="cloud">Cloud & DevOps</button>
+              <button class="pill" data-topic="cybersecurity">Cybersecurity</button>
+              <button class="pill" data-topic="cli">CLI Tools</button>
+              <button class="pill" data-topic="mobile">Mobile</button>
+              <button class="pill" data-topic="docs">Docs & Technical Writing</button>
             </div>
           </div>
         </div>
@@ -88,6 +118,16 @@
             <div class="toggle-group" id="experienceToggle">
               <button class="toggle-btn active" data-level="first-timer">First-Timer (Gentle)</button>
               <button class="toggle-btn" data-level="moderate">Moderate (Intermediate)</button>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">Effort / Time Horizon</span>
+            <div class="pill-group compact-pills" id="effortPills">
+              <button class="pill active" data-effort="any">Any Horizon</button>
+              <button class="pill" data-effort="quick">Quick Win (&lt; 1h)</button>
+              <button class="pill" data-effort="standard">Standard (1–3h)</button>
+              <button class="pill" data-effort="deep-dive">Deep Dive (3h+)</button>
             </div>
           </div>
 

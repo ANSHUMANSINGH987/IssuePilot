@@ -54,8 +54,10 @@ synthesizer = DossierSynthesizer(client=client)
 
 
 class ScanRequest(BaseModel):
-    language: Optional[str] = "python"
+    language: Optional[str] = ""
     topic: Optional[str] = None
+    experience: Optional[str] = None
+    effort: Optional[str] = None
     limit: Optional[int] = 6
     repo: Optional[str] = None
 
@@ -97,6 +99,7 @@ def scan_issues_endpoint(req: ScanRequest) -> Dict[str, Any]:
         issues = find_candidate_issues(
             language=req.language,
             topic=req.topic,
+            effort=req.effort,
             limit=limit,
             repo=req.repo,
             use_mock_fallback=True
@@ -107,6 +110,8 @@ def scan_issues_endpoint(req: ScanRequest) -> Dict[str, Any]:
             "filters": {
                 "language": req.language,
                 "topic": req.topic,
+                "experience": req.experience,
+                "effort": req.effort,
                 "limit": limit,
             },
             "issues": issues,
