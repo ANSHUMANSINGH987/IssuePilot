@@ -178,6 +178,7 @@ def find_candidate_issues(
                     "title": item.get("title"),
                     "repo": repo_full_name,
                     "html_url": item.get("html_url"),
+                    "url": item.get("html_url"),
                     "author": (item.get("user") or {}).get("login", "unknown"),
                     "labels": [lbl.get("name") for lbl in item.get("labels", []) if isinstance(lbl, dict)],
                     "comments": item.get("comments", 0),
