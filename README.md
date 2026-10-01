@@ -1,102 +1,200 @@
-# IssuePilot (First-PR Navigator) 🚀
+# IssuePilot (First-PR Navigator)
 
-> **An Autonomous Agent Skill & Open-Weight Model Harness for First-Time Open-Source Contributors**  
-> *Built for MLH Hacktoberfest 2026 • Published under the MIT License*
+IssuePilot helps a first-time contributor move from **"I found an issue"** to **"I know how to submit the pull request."** It matches a contributor's background with approachable open-source issues, explains the target repository, and produces a practical First-PR Onboarding Dossier.
+
+Built for the MLH Hacktoberfest 2026 challenge and released under the [MIT License](LICENSE).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Standard: AgentSkills.io](https://img.shields.io/badge/Standard-agentskills.io-blue.svg)](first-pr-navigator/SKILL.md)
 [![Model: Open-Weight](https://img.shields.io/badge/Model-Qwen%202.5%20Coder%20%7C%20Llama%203.1-purple.svg)](harness/)
-[![Theme: Linear Dark](https://img.shields.io/badge/UI-Linear%2FVercel%20Aesthetic-black.svg)](web/)
 
----
+## What It Does
 
-## 🌟 Overview
+A beginner usually has three separate questions:
 
-**IssuePilot** transforms open-source newcomers into confident code contributors by eliminating the cognitive overload of exploring unfamiliar repositories. It systematically diagnoses contributor capabilities, discovers unassigned "starter" issues (`good first issue`, `hacktoberfest`, `help wanted`), contextualizes repository architecture, and synthesizes an actionable **First-PR Onboarding Dossier**.
+1. **Which issue is realistic for me?**
+2. **Where in this unfamiliar repository would I make the change?**
+3. **What commands and PR conventions do I need to follow?**
 
----
+IssuePilot answers those questions as one workflow:
 
-## 🏗️ Architecture
-
-```
-IssuePilot
-├── first-pr-navigator/             # Agent Skill (agentskills.io standard)
-│   ├── SKILL.md                    # Standard frontmatter & 4-stage workflow
-│   ├── scripts/
-│   │   ├── scan_issues.py          # GitHub issue candidate discovery
-│   │   └── analyze_repo.py         # Repo topology & toolchain extractor
-│   └── references/
-│       └── git_workflow.md         # Forking, Conventional Commits & squash-merge hygiene
-├── harness/                        # Open-Weight Model Runtime
-│   ├── client.py                   # Async OpenAI-compatible client (Ollama/vLLM)
-│   ├── dossier_synthesizer.py      # Qwen 2.5 Coder & Llama 3.1 prompt synthesis
-│   └── test_run.py                 # End-to-end integration test runner
-├── web/                            # Contributor Web Dashboard
-│   ├── server.py                   # FastAPI REST API bridge
-│   └── static/                     # Dark mode Linear/Vercel UI (HTML/CSS/JS)
-└── LICENSE                         # MIT License (2026 IssuePilot Contributors)
+```text
+Contributor profile
+        |
+        v
+Issue discovery  --->  Repository analysis  --->  Onboarding Dossier
+        |                         |                       |
+        v                         v                       v
+Language, domain,        Build files, tests,       Target files, setup,
+experience, effort       README, contribution     verification, PR checklist
+                         guidelines
 ```
 
----
+The result is guidance a student can act on, not only an issue list or a model-generated summary.
 
-## ⚡ Quickstart (For Hackathon Judges)
+## How The System Works
 
-### 1. Launch the Web Dashboard
+### 1. Profile
+
+The dashboard accepts broad technology and contribution preferences:
+
+- Languages from Python, JavaScript, TypeScript, Java, C++, Go, Rust, C#, Kotlin, Swift, Dart, PHP, Ruby, Zig, Elixir, and Solidity, plus any custom GitHub language.
+- Domains such as AI/ML and agents, web/API, frontend/UI, cloud/DevOps, cybersecurity, CLI tools, mobile, and technical writing.
+- Experience level and expected effort: quick win, standard, or deep dive.
+
+`Any` selections are sent as empty or omitted filters. A custom language takes priority over a standard language chip.
+
+### 2. Discover Issues
+
+`first-pr-navigator/scripts/scan_issues.py` queries the GitHub Search API for open, unassigned issues with low comment counts and beginner-friendly labels. Friendly dashboard values are translated into GitHub search syntax, for example:
+
+- `C++` becomes `language:"C++"`.
+- `C#` becomes `language:"C#"`.
+- AI/ML becomes `topic:ai`, `topic:machine-learning`, `topic:llm`, or `topic:agents`.
+- Cybersecurity becomes `topic:security` or `topic:infosec`.
+- Documentation uses `documentation` or `docs` labels instead of a programming-language qualifier.
+
+When GitHub is unavailable or rate-limited, the scanner uses deterministic fixtures covering CLI, systems, AI, web/frontend, cloud/DevOps, mobile, cybersecurity, and documentation paths.
+
+### 3. Analyze The Repository
+
+`first-pr-navigator/scripts/analyze_repo.py` inspects repository metadata, top-level files, build manifests, README content, contribution guidance, and likely test/lint commands. It returns a compact context object for dossier generation.
+
+### 4. Synthesize The Dossier
+
+`harness/dossier_synthesizer.py` combines the issue and repository context into five sections:
+
+1. Executive architecture summary
+2. Root cause and solution blueprint
+3. Target files to inspect
+4. Local development and verification commands
+5. Git branch and PR submission checklist
+
+If an OpenAI-compatible model endpoint is available, the harness uses it. Otherwise it produces the same structure through a deterministic fallback, so the dashboard remains usable offline.
+
+## Run It Locally
+
+### Requirements
+
+- Python 3.10 or newer
+- `fastapi`, `uvicorn`, and `pytest`
+- Optional: a GitHub token for higher API rate limits
+- Optional: Ollama, vLLM, SGLang, LM Studio, or Hugging Face Router for live model inference
+
+Install the Python dependencies in your environment, then create local configuration from the template:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Keep `.env` local. It is ignored by Git and must never contain credentials committed to the repository.
+
+### Start The Dashboard
+
+From the project root, use either command:
+
 ```bash
-# Start the FastAPI server (runs on port 8000 by default)
 python web/server.py
-# Or run from the project root with Uvicorn's reload support
+```
+
+```bash
 uvicorn web.server:app --reload
 ```
-Open **`http://localhost:8000`** in your browser.
 
-- Click **`⚡ Load Demo Profile`** to load a verified first-timer preset.
-- Explore candidate starter issues with live Hacktoberfest badges.
-- Click **`Generate Dossier`** to launch the slide-out onboarding drawer featuring:
-  - 3-sentence executive repository architecture summary
-  - Target files to inspect
-  - Copy-paste local development script with 1-click clipboard button
-  - Conventional Commit & PR checklist
+Open <http://localhost:8000>. The **Load Demo Profile** button selects a predictable Python/CLI/first-timer profile and loads the offline-friendly candidate flow.
 
----
+### Run The CLI Pipeline
 
-### 2. Run the CLI End-to-End Pipeline
 ```bash
-# Execute end-to-end scan -> analyze -> synthesis flow
+python first-pr-navigator/scripts/scan_issues.py --language python --limit 3
 python harness/test_run.py --language python
 ```
-Sample generated dossier is saved to: `output/dossier_issue_42.md`.
 
-### 3. Run the Test Suite
+The end-to-end command writes a dossier to `output/dossier_issue_42.md` by default. A custom output filename is also supported:
+
 ```bash
-pytest tests/
+python harness/test_run.py --output dossier.md
 ```
 
----
+### Run Tests
 
-## 🤖 Open-Weight Model Integration
+```bash
+pytest -v
+```
 
-IssuePilot connects to local or remote open-weight inference backends via standard OpenAI-compatible endpoints:
+The suite covers scanner fallback and query aliases, repository inference, offline model behavior, dossier structure, expanded filter forwarding, and the FastAPI endpoints.
 
-- **Target Backend**: Ollama, vLLM, SGLang, or LM Studio
-- **Default Base**: `http://localhost:11434/v1`
-- **Default Model**: `qwen2.5-coder:7b` (or `llama3.1:8b`)
-- **Offline Resilience**: When local inference endpoints are offline, IssuePilot automatically activates its deterministic architectural fallback engine to ensure zero crashes and consistent developer guidance.
+## API Surface
 
----
+The dashboard is a thin client over four routes:
 
-## 📜 Agent Skill Open Standard Conformance
+| Route | Purpose |
+| --- | --- |
+| `GET /api/health` | Reports GitHub configuration and live/fallback model status. |
+| `POST /api/scan` | Returns candidate issues for language, domain, experience, effort, and repository filters. |
+| `POST /api/dossier` | Analyzes a selected repository and generates its onboarding dossier. |
+| `GET /` | Serves the dashboard. |
 
-The `first-pr-navigator` skill conforms strictly to the [Agent Skill Open Standard](https://agentskills.io):
-- **YAML Frontmatter**: Standard-compliant fields (`name`, `allowed-tools: "bash file_read http_request"`, string-only `metadata` including the skill version).
-- **Standard Layout**: Root `SKILL.md`, deterministic tooling in `scripts/`, domain references in `references/`.
-- **4-Stage Pipeline**:
-  1. *Contributor Profiling*
-  2. *Candidate Issue Discovery*
-  3. *Repository Contextualization*
-  4. *Onboarding Dossier Synthesis*
+An example scan request is:
 
----
+```json
+{
+  "language": "kotlin",
+  "topic": "mobile",
+  "experience": "first-timer",
+  "effort": "quick",
+  "limit": 6
+}
+```
 
-## 📄 License
-Published under the [MIT License](LICENSE) — Copyright (c) 2026 IssuePilot Contributors.
+The API clamps `limit` to 1 through 20. Issue records expose both `html_url` and the compatible `url` alias.
+
+## Configure An Open-Weight Model
+
+The harness uses the OpenAI-compatible `/chat/completions` contract. Configure the endpoint and model in `.env`:
+
+```dotenv
+OPEN_WEIGHT_API_BASE=http://localhost:11434/v1
+OPEN_WEIGHT_API_KEY=EMPTY
+OPEN_WEIGHT_MODEL=qwen2.5-coder:7b
+```
+
+Hugging Face Router is also supported:
+
+```dotenv
+OPEN_WEIGHT_API_BASE=https://router.huggingface.co/v1
+OPEN_WEIGHT_API_KEY=<your-token>
+OPEN_WEIGHT_MODEL=deepseek-ai/DeepSeek-R1:fastest
+```
+
+The client preserves model identifiers containing colons and sends `Authorization: Bearer <OPEN_WEIGHT_API_KEY>` to `/chat/completions`.
+
+## Agent Skill Standard
+
+The `first-pr-navigator` directory is an Agent Skill following the [Agent Skills Open Standard](https://agentskills.io):
+
+```text
+first-pr-navigator/
+├── SKILL.md                 # YAML metadata and four-phase instructions
+├── scripts/
+│   ├── scan_issues.py       # Issue discovery and offline fixtures
+│   └── analyze_repo.py      # Repository context extraction
+└── references/
+    └── git_workflow.md      # Fork, upstream, branch, and PR guidance
+```
+
+The skill's four phases are contributor profiling, candidate issue discovery, repository contextualization, and dossier synthesis. Its `allowed-tools` declaration is kept in the standard space-separated format.
+
+## Repository Map
+
+```text
+harness/                    Open-weight client and dossier synthesis
+web/                        FastAPI server and dashboard assets
+tests/                      Unit and endpoint regression tests
+output/                     Example generated dossier
+LICENSE                     MIT license
+```
+
+## License
+
+IssuePilot is published under the [MIT License](LICENSE).

@@ -12,6 +12,7 @@ Validates:
 
 import os
 import sys
+import json
 import urllib.error
 from pathlib import Path
 import pytest
@@ -30,6 +31,7 @@ import scan_issues
 from scan_issues import find_candidate_issues, build_search_query
 from analyze_repo import analyze_github_repo, infer_stack, infer_quickstart
 from harness.client import OpenWeightClient
+import harness.client as harness_client
 from harness.dossier_synthesizer import DossierSynthesizer, generate_fallback_dossier
 from web.server import app
 from fastapi.testclient import TestClient
@@ -128,6 +130,47 @@ def test_open_weight_client_offline_handling():
     assert not client.is_server_available()
     res = client.chat_completion(messages=[{"role": "user", "content": "hi"}])
     assert res["provider"] in ["offline", "error"]
+
+
+def test_huggingface_router_request(monkeypatch):
+    """Validates router URL, bearer auth, and colon-containing model IDs."""
+    captured = {}
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            return False
+
+        def read(self):
+            return json.dumps({
+                "model": "deepseek-ai/DeepSeek-R1:fastest",
+                "choices": [{"message": {"content": "ok"}}],
+            }).encode("utf-8")
+
+    def fake_urlopen(request, timeout):
+        captured["url"] = request.full_url
+        captured["authorization"] = request.get_header("Authorization")
+        captured["payload"] = json.loads(request.data.decode("utf-8"))
+        captured["timeout"] = timeout
+        return FakeResponse()
+
+    monkeypatch.setenv("OPEN_WEIGHT_API_BASE", "https://router.huggingface.co/v1")
+    monkeypatch.setenv("OPEN_WEIGHT_API_KEY", "test-hf-key")
+    monkeypatch.setenv("OPEN_WEIGHT_MODEL", "deepseek-ai/DeepSeek-R1:fastest")
+    monkeypatch.setattr(harness_client.urllib.request, "urlopen", fake_urlopen)
+
+    client = OpenWeightClient(timeout=7)
+    result = client.chat_completion(messages=[{"role": "user", "content": "hello"}])
+
+    assert captured["url"] == "https://router.huggingface.co/v1/chat/completions"
+    assert captured["authorization"] == "Bearer test-hf-key"
+    assert captured["payload"]["model"] == "deepseek-ai/DeepSeek-R1:fastest"
+    assert captured["timeout"] == 7
+    assert result["content"] == "ok"
 
 
 def test_dossier_synthesis_markdown():
